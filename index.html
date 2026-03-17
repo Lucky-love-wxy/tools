@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>医步到位 · 计时工具</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --bg: #F2F2F7;
+  --surface: #FFFFFF;
+  --surface2: #F2F2F7;
+  --grouped: #EFEFF4;
+  --accent: #007AFF;
+  --accent-light: rgba(0,122,255,0.1);
+  --text: #1C1C1E;
+  --text-secondary: #8E8E93;
+  --text-tertiary: #AEAEB2;
+  --success: #34C759;
+  --danger: #FF3B30;
+  --warning: #FF9500;
+  --separator: rgba(60,60,67,0.12);
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  min-height: 100vh;
+  padding: 0 0 40px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.nav-bar {
+  background: rgba(242,242,247,0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  padding: 56px 20px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--separator);
+}
+.nav-title { font-size: 17px; font-weight: 600; color: var(--text); }
+.nav-count { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+/* ── Sections ── */
+.section { padding: 20px 16px 0; }
+.section-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 0 4px;
+  margin-bottom: 8px;
+}
+.hint-text { font-size: 12px; color: var(--text-tertiary); padding: 0 4px; margin-top: -4px; margin-bottom: 10px; }
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* ── Recorder ── */
+.recorder-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  gap: 12px;
+}
+.recorder-row label { font-size: 15px; color: var(--text); white-space: nowrap; }
+.recorder-row input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  color: var(--accent);
+  font-family: inherit;
+  outline: none;
+  text-align: right;
+}
+.recorder-row input::placeholder { color: var(--text-tertiary); }
+
+/* ── Dept chips ── */
+.dept-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.dept-chip {
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: none;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s;
+  font-weight: 500;
+}
+.dept-chip.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+}
+.dept-chip.add-btn {
+  background: var(--surface);
+  color: var(--accent);
+  border: 1.5px dashed var(--accent);
+  box-shadow: none;
+}
+
+/* ── Type toggle ── */
+.type-toggle {
+  display: flex;
+  background: var(--grouped);
+  border-radius: 9px;
+  padding: 3px;
+  gap: 3px;
+}
+.type-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.type-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Timer ── */
+.timer-card {
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 28px 20px 20px;
+  text-align: center;
+}
+.timer-digits {
+  font-size: 80px;
+  font-weight: 200;
+  color: var(--text);
+  letter-spacing: -2px;
+  line-height: 1;
+  margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.2s;
+}
+.timer-digits.running { color: var(--success); }
+.timer-sub { font-size: 13px; color: var(--text-tertiary); letter-spacing: 0.2px; margin-bottom: 24px; }
+
+/* ── Controls ── */
+.controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn {
+  padding: 15px;
+  border-radius: 10px;
+  border: none;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.2px;
+}
+.btn:active { transform: scale(0.97); opacity: 0.85; }
+.btn-start {
+  grid-column: 1 / -1;
+  background: var(--success);
+  color: #fff;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(52,199,89,0.3);
+}
+.btn-start.running {
+  background: var(--danger);
+  box-shadow: 0 2px 8px rgba(255,59,48,0.3);
+}
+.btn-record {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,122,255,0.25);
+}
+.btn-record:disabled {
+  background: var(--grouped);
+  color: var(--text-tertiary);
+  box-shadow: none;
+}
+.btn-reset { background: var(--grouped); color: var(--text-secondary); }
+
+/* ── Note ── */
+.note-row {
+  display: flex;
+  align-items: center;
+  padding: 13px 16px;
+  gap: 10px;
+  border-top: 1px solid var(--separator);
+}
+.note-row label { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+.note-row input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--text);
+  font-family: inherit;
+  outline: none;
+}
+.note-row input::placeholder { color: var(--text-tertiary); }
+
+/* ── Stats ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.stat-item {
+  padding: 14px 8px;
+  text-align: center;
+}
+.stat-item + .stat-item { border-left: 1px solid var(--separator); }
+.stat-val { font-size: 22px; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; }
+.stat-lbl { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+/* ── Records header ── */
+.records-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+  margin-bottom: 8px;
+}
+.btn-export {
+  padding: 5px 12px;
+  border-radius: 14px;
+  border: none;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-export:active { opacity: 0.7; }
+
+/* ── Record items (swipe-to-delete) ── */
+.record-wrapper {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 8px;
+}
+.record-item {
+  background: var(--surface);
+  padding: 13px 16px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px;
+  align-items: center;
+  transition: transform 0.25s cubic-bezier(0.25,0.46,0.45,0.94);
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+  user-select: none;
+}
+.record-left {}
+.record-dept { font-size: 15px; font-weight: 500; color: var(--text); }
+.record-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.record-note { font-size: 12px; color: var(--text-tertiary); margin-top: 3px; }
+.record-right { text-align: right; }
+.record-duration { font-size: 24px; font-weight: 300; color: var(--accent); font-variant-numeric: tabular-nums; }
+.record-time { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+
+.delete-action {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 80px;
+  background: var(--danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 0;
+  font-family: inherit;
+  border: none;
+}
+.delete-action:active { background: #d70015; }
+
+.records-list { padding-bottom: 4px; }
+.empty-state {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 15px;
+  box-shadow: var(--shadow-sm);
+}
+.empty-state .empty-icon { font-size: 36px; margin-bottom: 10px; }
+.empty-sub { font-size: 13px; color: var(--text-tertiary); margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="nav-bar">
+  <div class="nav-title">医步到位 · 计时</div>
+  <div class="nav-count" id="totalCount">暂无记录</div>
+</div>
+
+<div class="section">
+  <div class="section-header">记录人</div>
+  <div class="card">
+    <div class="recorder-row">
+      <label>姓名</label>
+      <input type="text" id="recorderName" placeholder="输入你的名字" maxlength="10">
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header">科室</div>
+  <p class="hint-text">长按可删除自定义科室</p>
+  <div class="dept-grid" id="deptGrid"></div>
+</div>
+
+<div class="section">
+  <div class="card" style="padding:4px;">
+    <div class="type-toggle">
+      <button class="type-btn active" onclick="setType('wait')" id="typeWait">⏳ 等待时间</button>
+      <button class="type-btn" onclick="setType('service')" id="typeService">🩺 服务时间</button>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="timer-card">
+    <div class="timer-digits" id="timerDisplay">00:00</div>
+    <div class="timer-sub" id="timerSub">选择科室后开始计时</div>
+    <div class="controls">
+      <button class="btn btn-start" id="startBtn" onclick="toggleTimer()">开始</button>
+      <button class="btn btn-record" id="recordBtn" onclick="recordTime()" disabled>记录</button>
+      <button class="btn btn-reset" onclick="resetTimer()">重置</button>
+    </div>
+    <div class="note-row">
+      <label>备注</label>
+      <input type="text" id="noteInput" placeholder="高峰期 / 老年患者 / 无预约...">
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header" style="margin-bottom:0">统计</div>
+  <div style="height:8px"></div>
+  <div class="card">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-val" id="statCount">0</div><div class="stat-lbl">总记录</div></div>
+      <div class="stat-item"><div class="stat-val" id="statAvg">--</div><div class="stat-lbl">均值</div></div>
+      <div class="stat-item"><div class="stat-val" id="statMax">--</div><div class="stat-lbl">最长</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="records-header">
+    <div class="section-header" style="margin:0">记录列表</div>
+    <button class="btn-export" onclick="exportCSV()">导出 CSV</button>
+  </div>
+  <div class="records-list" id="recordsList">
+    <div class="empty-state">
+      <div class="empty-icon">⏱</div>
+      暂无记录
+      <div class="empty-sub">选择科室后开始计时</div>
+    </div>
+  </div>
+</div>
+
+<script>
+var DEFAULT_DEPTS = ['挂号窗口','内科候诊','外科候诊','儿科候诊','超声/B超','CT检查','核磁共振','抽血检验','药房取药'];
+
+var depts        = JSON.parse(localStorage.getItem('mdw_depts')   || JSON.stringify(DEFAULT_DEPTS));
+var records      = JSON.parse(localStorage.getItem('mdw_records') || '[]');
+var selectedDept = null;
+var timerType    = 'wait';
+var timerInterval = null;
+var startTime    = null;
+var elapsed      = 0;
+var isRunning    = false;
+
+var nameInput = document.getElementById('recorderName');
+nameInput.value = localStorage.getItem('mdw_recorder') || '';
+nameInput.addEventListener('input', function(e) {
+  localStorage.setItem('mdw_recorder', e.target.value);
+});
+
+renderDepts();
+renderRecords();
+updateStats();
+
+// ── 科室 ─────────────────────────────────────────────────
+function renderDepts() {
+  var grid = document.getElementById('deptGrid');
+  grid.innerHTML = '';
+  depts.forEach(function(d) {
+    var btn = document.createElement('button');
+    btn.className = 'dept-chip' + (d === selectedDept ? ' active' : '');
+    btn.textContent = d;
+    btn.onclick = function() { selectDept(d); };
+    var pressTimer;
+    btn.addEventListener('touchstart', function() {
+      pressTimer = setTimeout(function() {
+        if (!DEFAULT_DEPTS.includes(d) && confirm('删除"' + d + '"？')) {
+          depts = depts.filter(function(x) { return x !== d; });
+          if (selectedDept === d) selectedDept = null;
+          localStorage.setItem('mdw_depts', JSON.stringify(depts));
+          renderDepts();
+          updateStats();
+        }
+      }, 700);
+    });
+    btn.addEventListener('touchend',  function() { clearTimeout(pressTimer); });
+    btn.addEventListener('touchmove', function() { clearTimeout(pressTimer); });
+    grid.appendChild(btn);
+  });
+  var add = document.createElement('button');
+  add.className = 'dept-chip add-btn';
+  add.textContent = '+ 添加';
+  add.onclick = addDept;
+  grid.appendChild(add);
+}
+
+function selectDept(d) {
+  selectedDept = d;
+  renderDepts();
+  updateStats();
+  document.getElementById('timerSub').textContent =
+    d + ' · ' + (timerType === 'wait' ? '等待时间' : '服务时间');
+}
+
+function addDept() {
+  var name = prompt('输入科室名称：');
+  if (name && name.trim() && !depts.includes(name.trim())) {
+    depts.push(name.trim());
+    localStorage.setItem('mdw_depts', JSON.stringify(depts));
+    renderDepts();
+  }
+}
+
+// ── 类型切换 ──────────────────────────────────────────────
+function setType(t) {
+  timerType = t;
+  document.getElementById('typeWait').classList.toggle('active', t === 'wait');
+  document.getElementById('typeService').classList.toggle('active', t === 'service');
+  if (selectedDept)
+    document.getElementById('timerSub').textContent =
+      selectedDept + ' · ' + (t === 'wait' ? '等待时间' : '服务时间');
+}
+
+// ── 计时器 ────────────────────────────────────────────────
+function toggleTimer() {
+  if (!selectedDept) { alert('请先选择科室'); return; }
+  if (isRunning) {
+    clearInterval(timerInterval);
+    elapsed += Date.now() - startTime;
+    isRunning = false;
+    document.getElementById('startBtn').textContent = '继续';
+    document.getElementById('startBtn').classList.remove('running');
+  } else {
+    startTime = Date.now();
+    isRunning = true;
+    document.getElementById('startBtn').textContent = '暂停';
+    document.getElementById('startBtn').classList.add('running');
+    document.getElementById('recordBtn').disabled = false;
+    timerInterval = setInterval(updateDisplay, 200);
+  }
+}
+
+function updateDisplay() {
+  var total = elapsed + (isRunning ? Date.now() - startTime : 0);
+  var secs  = Math.floor(total / 1000);
+  var mins  = Math.floor(secs / 60);
+  var el = document.getElementById('timerDisplay');
+  el.textContent = pad(mins) + ':' + pad(secs % 60);
+  el.className = 'timer-digits' + (isRunning ? ' running' : '');
+}
+
+function recordTime() {
+  var total = elapsed + (isRunning ? Date.now() - startTime : 0);
+  if (total < 1000) return;
+  if (isRunning) {
+    clearInterval(timerInterval);
+    elapsed += Date.now() - startTime;
+    isRunning = false;
+  }
+  var totalSecs = Math.floor(elapsed / 1000);
+  var recorder  = nameInput.value.trim() || '未署名';
+  var note      = document.getElementById('noteInput').value.trim();
+
+  records.unshift({
+    id: Date.now(),
+    recorder: recorder,
+    dept: selectedDept,
+    type: timerType,
+    duration: totalSecs,
+    note: note,
+    timestamp: new Date().toISOString()
+  });
+  localStorage.setItem('mdw_records', JSON.stringify(records));
+
+  elapsed = 0; startTime = null; isRunning = false;
+  document.getElementById('startBtn').textContent = '开始';
+  document.getElementById('startBtn').classList.remove('running');
+  document.getElementById('recordBtn').disabled = true;
+  document.getElementById('timerDisplay').textContent = '00:00';
+  document.getElementById('timerDisplay').className = 'timer-digits';
+  document.getElementById('noteInput').value = '';
+  renderRecords();
+  updateStats();
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  elapsed = 0; startTime = null; isRunning = false;
+  document.getElementById('startBtn').textContent = '开始';
+  document.getElementById('startBtn').classList.remove('running');
+  document.getElementById('recordBtn').disabled = true;
+  document.getElementById('timerDisplay').textContent = '00:00';
+  document.getElementById('timerDisplay').className = 'timer-digits';
+}
+
+// ── 删除记录 ──────────────────────────────────────────────
+function deleteRecord(id) {
+  records = records.filter(function(r) { return r.id !== id; });
+  localStorage.setItem('mdw_records', JSON.stringify(records));
+  renderRecords();
+  updateStats();
+}
+
+// ── 统计 ──────────────────────────────────────────────────
+function updateStats() {
+  var filtered = selectedDept
+    ? records.filter(function(r) { return r.dept === selectedDept; })
+    : [];
+  document.getElementById('statCount').textContent = records.length;
+  document.getElementById('totalCount').textContent =
+    records.length ? records.length + ' 条记录' : '暂无记录';
+  if (filtered.length > 0) {
+    var sum = filtered.reduce(function(s, r) { return s + r.duration; }, 0);
+    var avg = Math.round(sum / filtered.length);
+    var max = Math.max.apply(null, filtered.map(function(r) { return r.duration; }));
+    document.getElementById('statAvg').textContent = fmtSec(avg);
+    document.getElementById('statMax').textContent = fmtSec(max);
+  } else {
+    document.getElementById('statAvg').textContent = '--';
+    document.getElementById('statMax').textContent = '--';
+  }
+}
+
+// ── 渲染记录（含左滑删除） ────────────────────────────────
+function renderRecords() {
+  var list = document.getElementById('recordsList');
+  if (!records.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">⏱</div>暂无记录<div class="empty-sub">选择科室后开始计时</div></div>';
+    return;
+  }
+  list.innerHTML = '';
+  records.slice(0, 60).forEach(function(r) {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'record-wrapper';
+
+    var delBtn = document.createElement('button');
+    delBtn.className = 'delete-action';
+    delBtn.textContent = '删除';
+    delBtn.onclick = function() { deleteRecord(r.id); };
+
+    var item = document.createElement('div');
+    item.className = 'record-item';
+    item.innerHTML =
+      '<div class="record-left">' +
+        '<div class="record-dept">' + r.dept + '</div>' +
+        '<div class="record-meta">' + (r.type === 'wait' ? '等待' : '服务') + ' · ' + r.recorder + '</div>' +
+        (r.note ? '<div class="record-note">' + r.note + '</div>' : '') +
+      '</div>' +
+      '<div class="record-right">' +
+        '<div class="record-duration">' + fmtSec(r.duration) + '</div>' +
+        '<div class="record-time">' + fmtTime(r.timestamp) + '</div>' +
+      '</div>';
+
+    // 左滑手势
+    var touchStartX = 0;
+    var currentX    = 0;
+    var swiped       = false;
+
+    item.addEventListener('touchstart', function(e) {
+      touchStartX = e.touches[0].clientX;
+      currentX    = 0;
+      item.style.transition = 'none';
+    }, { passive: true });
+
+    item.addEventListener('touchmove', function(e) {
+      var dx = e.touches[0].clientX - touchStartX;
+      if (dx < 0) {
+        currentX = Math.max(dx, -80);
+        item.style.transform = 'translateX(' + currentX + 'px)';
+      } else if (swiped && dx > 0) {
+        currentX = Math.min(-80 + dx, 0);
+        item.style.transform = 'translateX(' + currentX + 'px)';
+      }
+    }, { passive: true });
+
+    item.addEventListener('touchend', function() {
+      item.style.transition = '';
+      if (currentX < -40) {
+        item.style.transform = 'translateX(-80px)';
+        swiped = true;
+      } else {
+        item.style.transform = 'translateX(0)';
+        swiped = false;
+      }
+    });
+
+    // 点击其他区域收回
+    item.addEventListener('click', function() {
+      if (swiped) {
+        item.style.transform = 'translateX(0)';
+        swiped = false;
+      }
+    });
+
+    wrapper.appendChild(delBtn);
+    wrapper.appendChild(item);
+    list.appendChild(wrapper);
+  });
+}
+
+// ── 导出 CSV ──────────────────────────────────────────────
+function exportCSV() {
+  if (!records.length) { alert('暂无数据'); return; }
+  var header = '记录人,科室,类型,时长(秒),时长(分:秒),备注,记录时间';
+  var rows = records.map(function(r) {
+    return [
+      r.recorder, r.dept,
+      r.type === 'wait' ? '等待时间' : '服务时间',
+      r.duration, fmtSec(r.duration),
+      r.note || '', fmtTime(r.timestamp)
+    ].map(function(v) {
+      return '"' + String(v).replace(/"/g, '""') + '"';
+    }).join(',');
+  });
+  var csv  = '\uFEFF' + [header].concat(rows).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  var a    = document.createElement('a');
+  a.href   = URL.createObjectURL(blob);
+  a.download = '医步到位_' + (nameInput.value.trim() || '未署名') + '_' +
+               new Date().toLocaleDateString('zh') + '.csv';
+  a.click();
+}
+
+// ── 工具函数 ──────────────────────────────────────────────
+function pad(n) { return String(n).padStart(2, '0'); }
+function fmtSec(s) { return pad(Math.floor(s / 60)) + ':' + pad(s % 60); }
+function fmtTime(iso) {
+  var d = new Date(iso);
+  return pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+</script>
+</body>
+</html>
