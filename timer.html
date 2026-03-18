@@ -88,7 +88,7 @@ body {
 }
 .recorder-row input::placeholder { color: var(--text-tertiary); }
 
-/* ── Dept chips ── */
+/* ── Dept chips (multi-select) ── */
 .dept-grid { display: flex; flex-wrap: wrap; gap: 8px; }
 .dept-chip {
   padding: 7px 14px;
@@ -103,7 +103,7 @@ body {
   transition: all 0.15s;
   font-weight: 500;
 }
-.dept-chip.active {
+.dept-chip.selected {
   background: var(--accent);
   color: #fff;
   box-shadow: 0 2px 8px rgba(0,122,255,0.3);
@@ -114,63 +114,93 @@ body {
   border: 1.5px dashed var(--accent);
   box-shadow: none;
 }
+.dept-chip.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-/* ── Type toggle ── */
-.type-toggle {
+/* ── Timer Cards ── */
+.timers-container {
   display: flex;
-  background: var(--grouped);
-  border-radius: 9px;
-  padding: 3px;
-  gap: 3px;
+  flex-direction: column;
+  gap: 12px;
 }
-.type-btn {
-  flex: 1;
-  padding: 8px;
-  border-radius: 7px;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.18s;
-}
-.type-btn.active {
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: var(--shadow-sm);
-}
-
-/* ── Timer ── */
 .timer-card {
   background: var(--surface);
   border-radius: 16px;
   box-shadow: var(--shadow);
-  padding: 28px 20px 20px;
-  text-align: center;
+  padding: 20px 16px 16px;
+  border-left: 4px solid var(--accent);
 }
+.timer-card.running { border-left-color: var(--success); }
+.timer-card.paused { border-left-color: var(--warning); }
+
 .timer-digits {
-  font-size: 80px;
+  font-size: 48px;
   font-weight: 200;
   color: var(--text);
   letter-spacing: -2px;
   line-height: 1;
-  margin-bottom: 6px;
+  text-align: center;
   font-variant-numeric: tabular-nums;
   transition: color 0.2s;
 }
 .timer-digits.running { color: var(--success); }
-.timer-sub { font-size: 13px; color: var(--text-tertiary); letter-spacing: 0.2px; margin-bottom: 24px; }
+.timer-sub { font-size: 14px; font-weight: 500; color: var(--text); text-align: center; margin-bottom: 16px; }
+
+/* ── Counter ── */
+.counter-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  background: var(--surface2);
+  border-radius: 10px;
+}
+.counter-row label { font-size: 13px; color: var(--text-secondary); }
+.counter-row input {
+  width: 56px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  text-align: center;
+  font-family: inherit;
+  outline: none;
+  box-shadow: var(--shadow-sm);
+}
+.counter-row input::placeholder { color: var(--text-tertiary); font-weight: 400; }
+.counter-btns { display: flex; gap: 4px; }
+.counter-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1;
+  transition: all 0.15s;
+}
+.counter-btn:active { transform: scale(0.9); }
+.counter-btn.minus { background: var(--grouped); color: var(--text-secondary); }
 
 /* ── Controls ── */
-.controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 .btn {
-  padding: 15px;
+  padding: 12px 8px;
   border-radius: 10px;
   border: none;
   font-family: inherit;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
@@ -178,10 +208,8 @@ body {
 }
 .btn:active { transform: scale(0.97); opacity: 0.85; }
 .btn-start {
-  grid-column: 1 / -1;
   background: var(--success);
   color: #fff;
-  font-size: 16px;
   box-shadow: 0 2px 8px rgba(52,199,89,0.3);
 }
 .btn-start.running {
@@ -204,8 +232,9 @@ body {
 .note-row {
   display: flex;
   align-items: center;
-  padding: 13px 16px;
+  padding: 10px 0 0;
   gap: 10px;
+  margin-top: 12px;
   border-top: 1px solid var(--separator);
 }
 .note-row label { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
@@ -255,7 +284,7 @@ body {
 }
 .btn-export:active { opacity: 0.7; }
 
-/* ── Record items (swipe-to-delete) ── */
+/* ── Record items ── */
 .record-wrapper {
   position: relative;
   border-radius: 12px;
@@ -276,7 +305,6 @@ body {
   cursor: pointer;
   user-select: none;
 }
-.record-left {}
 .record-dept { font-size: 15px; font-weight: 500; color: var(--text); }
 .record-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 .record-note { font-size: 12px; color: var(--text-tertiary); margin-top: 3px; }
@@ -334,34 +362,13 @@ body {
 </div>
 
 <div class="section">
-  <div class="section-header">科室</div>
-  <p class="hint-text">长按可删除自定义科室</p>
+  <div class="section-header">科室 <span id="deptCount">(已选0个，最多3个)</span></div>
+  <p class="hint-text">点击选择要同时计时的科室（最多3个）</p>
   <div class="dept-grid" id="deptGrid"></div>
 </div>
 
 <div class="section">
-  <div class="card" style="padding:4px;">
-    <div class="type-toggle">
-      <button class="type-btn active" onclick="setType('wait')" id="typeWait">⏳ 等待时间</button>
-      <button class="type-btn" onclick="setType('service')" id="typeService">🩺 服务时间</button>
-    </div>
-  </div>
-</div>
-
-<div class="section">
-  <div class="timer-card">
-    <div class="timer-digits" id="timerDisplay">00:00</div>
-    <div class="timer-sub" id="timerSub">选择科室后开始计时</div>
-    <div class="controls">
-      <button class="btn btn-start" id="startBtn" onclick="toggleTimer()">开始</button>
-      <button class="btn btn-record" id="recordBtn" onclick="recordTime()" disabled>记录</button>
-      <button class="btn btn-reset" onclick="resetTimer()">重置</button>
-    </div>
-    <div class="note-row">
-      <label>备注</label>
-      <input type="text" id="noteInput" placeholder="高峰期 / 老年患者 / 无预约...">
-    </div>
-  </div>
+  <div class="timers-container" id="timersContainer"></div>
 </div>
 
 <div class="section">
@@ -393,14 +400,15 @@ body {
 <script>
 var DEFAULT_DEPTS = ['挂号窗口','内科候诊','外科候诊','儿科候诊','超声/B超','CT检查','核磁共振','抽血检验','药房取药'];
 
-var depts        = JSON.parse(localStorage.getItem('mdw_depts')   || JSON.stringify(DEFAULT_DEPTS));
-var records      = JSON.parse(localStorage.getItem('mdw_records') || '[]');
-var selectedDept = null;
-var timerType    = 'wait';
-var timerInterval = null;
-var startTime    = null;
-var elapsed      = 0;
-var isRunning    = false;
+var depts         = JSON.parse(localStorage.getItem('mdw_depts')   || JSON.stringify(DEFAULT_DEPTS));
+if (!Array.isArray(depts) || depts.length === 0) {
+  depts = DEFAULT_DEPTS.slice();
+  localStorage.setItem('mdw_depts', JSON.stringify(depts));
+}
+var records       = JSON.parse(localStorage.getItem('mdw_records') || '[]');
+var selectedDepts = []; // 已选中的科室列表
+var MAX_DEPTS     = 3;
+var timerData     = {}; // 每个科室的计时数据
 
 var nameInput = document.getElementById('recorderName');
 nameInput.value = localStorage.getItem('mdw_recorder') || '';
@@ -409,34 +417,49 @@ nameInput.addEventListener('input', function(e) {
 });
 
 renderDepts();
+renderTimers();
 renderRecords();
 updateStats();
 
-// ── 科室 ─────────────────────────────────────────────────
+// ── 科室（多选） ─────────────────────────────────────────────
 function renderDepts() {
   var grid = document.getElementById('deptGrid');
   grid.innerHTML = '';
+  var count = selectedDepts.length;
+  document.getElementById('deptCount').textContent = '(已选' + count + '个，最多' + MAX_DEPTS + '个)';
+  
   depts.forEach(function(d) {
     var btn = document.createElement('button');
-    btn.className = 'dept-chip' + (d === selectedDept ? ' active' : '');
+    var isSelected = selectedDepts.includes(d);
+    var isDisabled = !isSelected && count >= MAX_DEPTS;
+    btn.className = 'dept-chip' + (isSelected ? ' selected' : '') + (isDisabled ? ' disabled' : '');
     btn.textContent = d;
-    btn.onclick = function() { selectDept(d); };
+    btn.onclick = function() {
+      if (isDisabled) return;
+      toggleDept(d);
+    };
+    // 长按删除自定义科室
     var pressTimer;
     btn.addEventListener('touchstart', function() {
       pressTimer = setTimeout(function() {
         if (!DEFAULT_DEPTS.includes(d) && confirm('删除"' + d + '"？')) {
           depts = depts.filter(function(x) { return x !== d; });
-          if (selectedDept === d) selectedDept = null;
+          selectedDepts = selectedDepts.filter(function(x) { return x !== d; });
+          if (timerData[d] && timerData[d].interval) clearInterval(timerData[d].interval);
+          delete timerData[d];
           localStorage.setItem('mdw_depts', JSON.stringify(depts));
           renderDepts();
+          renderTimers();
           updateStats();
         }
       }, 700);
     });
-    btn.addEventListener('touchend',  function() { clearTimeout(pressTimer); });
+    btn.addEventListener('touchend', function() { clearTimeout(pressTimer); });
     btn.addEventListener('touchmove', function() { clearTimeout(pressTimer); });
     grid.appendChild(btn);
   });
+  
+  // 添加科室按钮
   var add = document.createElement('button');
   add.className = 'dept-chip add-btn';
   add.textContent = '+ 添加';
@@ -444,12 +467,31 @@ function renderDepts() {
   grid.appendChild(add);
 }
 
-function selectDept(d) {
-  selectedDept = d;
+function toggleDept(d) {
+  var idx = selectedDepts.indexOf(d);
+  if (idx >= 0) {
+    // 取消选中：先停止该科室的计时器
+    var td = timerData[d];
+    if (td && td.interval) clearInterval(td.interval);
+    delete timerData[d];
+    selectedDepts.splice(idx, 1);
+  } else {
+    if (selectedDepts.length >= MAX_DEPTS) return;
+    selectedDepts.push(d);
+    // 初始化该科室的计时数据
+    timerData[d] = {
+      dept: d,
+      elapsed: 0,
+      startTime: null,
+      isRunning: false,
+      interval: null,
+      count: 1,
+      note: ''
+    };
+  }
   renderDepts();
+  renderTimers();
   updateStats();
-  document.getElementById('timerSub').textContent =
-    d + ' · ' + (timerType === 'wait' ? '等待时间' : '服务时间');
 }
 
 function addDept() {
@@ -461,86 +503,155 @@ function addDept() {
   }
 }
 
-// ── 类型切换 ──────────────────────────────────────────────
-function setType(t) {
-  timerType = t;
-  document.getElementById('typeWait').classList.toggle('active', t === 'wait');
-  document.getElementById('typeService').classList.toggle('active', t === 'service');
-  if (selectedDept)
-    document.getElementById('timerSub').textContent =
-      selectedDept + ' · ' + (t === 'wait' ? '等待时间' : '服务时间');
+// ── 渲染计时器 ─────────────────────────────────────────────
+function renderTimers() {
+  var container = document.getElementById('timersContainer');
+  container.innerHTML = '';
+  
+  if (selectedDepts.length === 0) {
+    container.innerHTML = '<div class="empty-state" style="padding:30px 20px;"><div class="empty-icon">⏱</div>点击上方科室开始计时<div class="empty-sub">最多同时3个科室</div></div>';
+    return;
+  }
+  
+  selectedDepts.forEach(function(dept) {
+    var td = timerData[dept];
+    var card = document.createElement('div');
+    var cardClass = 'timer-card';
+    if (td.isRunning) cardClass += ' running';
+    else if (td.elapsed > 0) cardClass += ' paused';
+    
+    card.className = cardClass;
+    card.innerHTML =
+      '<div class="timer-sub">' + dept + '</div>' +
+      '<div class="counter-row">' +
+        '<label>处理人数</label>' +
+        '<div class="counter-btns"><button class="counter-btn minus" onclick="adjustCount(\'' + dept + '\', -1)">−</button></div>' +
+        '<input type="number" id="count-\'' + dept + '\'" value="' + td.count + '" min="1">' +
+        '<div class="counter-btns"><button class="counter-btn" onclick="adjustCount(\'' + dept + '\', 1)">+</button></div>' +
+      '</div>' +
+      '<div class="timer-digits' + (td.isRunning ? ' running' : '') + '" id="display-\'' + dept + '\'">' + fmtSec(Math.floor(td.elapsed / 1000)) + '</div>' +
+      '<div class="controls">' +
+        '<button class="btn btn-start' + (td.isRunning ? ' running' : '') + '" id="start-\'' + dept + '\'" onclick="toggleTimer(\'' + dept + '\')">' + (td.isRunning ? '暂停' : (td.elapsed > 0 ? '继续' : '开始')) + '</button>' +
+        '<button class="btn btn-record" id="record-\'' + dept + '\'" onclick="recordTime(\'' + dept + '\')" ' + (td.elapsed < 1000 ? 'disabled' : '') + '>记录</button>' +
+        '<button class="btn btn-reset" onclick="resetTimer(\'' + dept + '\')">重置</button>' +
+      '</div>' +
+      '<div class="note-row">' +
+        '<label>备注</label>' +
+        '<input type="text" id="note-\'' + dept + '\'" placeholder="高峰期 / 老年患者..." value="' + (td.note || '') + '">' +
+      '</div>';
+    container.appendChild(card);
+    
+    // 绑定事件
+    document.getElementById('count-\'' + dept + '\'').addEventListener('input', function(e) {
+      var val = parseInt(e.target.value);
+      timerData[dept].count = (val && val > 0) ? val : 1;
+    });
+    document.getElementById('note-\'' + dept + '\'').addEventListener('input', function(e) {
+      timerData[dept].note = e.target.value;
+    });
+  });
 }
 
-// ── 计时器 ────────────────────────────────────────────────
-function toggleTimer() {
-  if (!selectedDept) { alert('请先选择科室'); return; }
-  if (isRunning) {
-    clearInterval(timerInterval);
-    elapsed += Date.now() - startTime;
-    isRunning = false;
-    document.getElementById('startBtn').textContent = '继续';
-    document.getElementById('startBtn').classList.remove('running');
+function adjustCount(dept, delta) {
+  var td = timerData[dept];
+  if (!td) return;
+  var input = document.getElementById('count-\'' + dept + '\'');
+  var val = parseInt(input.value) || 1;
+  val = Math.max(1, val + delta);
+  input.value = val;
+  td.count = val;
+}
+
+function toggleTimer(dept) {
+  var td = timerData[dept];
+  if (!td) return;
+  
+  var display = document.getElementById('display-\'' + dept + '\'');
+  var startBtn = document.getElementById('start-\'' + dept + '\'');
+  var recordBtn = document.getElementById('record-\'' + dept + '\'');
+  
+  if (td.isRunning) {
+    clearInterval(td.interval);
+    td.elapsed += Date.now() - td.startTime;
+    td.isRunning = false;
+    startBtn.textContent = '继续';
+    startBtn.classList.remove('running');
   } else {
-    startTime = Date.now();
-    isRunning = true;
-    document.getElementById('startBtn').textContent = '暂停';
-    document.getElementById('startBtn').classList.add('running');
-    document.getElementById('recordBtn').disabled = false;
-    timerInterval = setInterval(updateDisplay, 200);
+    td.startTime = Date.now();
+    td.isRunning = true;
+    startBtn.textContent = '暂停';
+    startBtn.classList.add('running');
+    recordBtn.disabled = false;
+    td.interval = setInterval(function() {
+      updateTimerDisplay(dept);
+    }, 200);
+  }
+  renderTimers();
+}
+
+function updateTimerDisplay(dept) {
+  var td = timerData[dept];
+  if (!td) return;
+  var total = td.elapsed + (td.isRunning ? Date.now() - td.startTime : 0);
+  var display = document.getElementById('display-\'' + dept + '\'');
+  if (display) {
+    var secs = Math.floor(total / 1000);
+    display.textContent = fmtSec(secs);
   }
 }
 
-function updateDisplay() {
-  var total = elapsed + (isRunning ? Date.now() - startTime : 0);
-  var secs  = Math.floor(total / 1000);
-  var mins  = Math.floor(secs / 60);
-  var el = document.getElementById('timerDisplay');
-  el.textContent = pad(mins) + ':' + pad(secs % 60);
-  el.className = 'timer-digits' + (isRunning ? ' running' : '');
-}
-
-function recordTime() {
-  var total = elapsed + (isRunning ? Date.now() - startTime : 0);
+function recordTime(dept) {
+  var td = timerData[dept];
+  if (!td) return;
+  
+  var total = td.elapsed + (td.isRunning ? Date.now() - td.startTime : 0);
   if (total < 1000) return;
-  if (isRunning) {
-    clearInterval(timerInterval);
-    elapsed += Date.now() - startTime;
-    isRunning = false;
+  
+  if (td.isRunning) {
+    clearInterval(td.interval);
+    td.elapsed += Date.now() - td.startTime;
+    td.isRunning = false;
   }
-  var totalSecs = Math.floor(elapsed / 1000);
-  var recorder  = nameInput.value.trim() || '未署名';
-  var note      = document.getElementById('noteInput').value.trim();
-
+  
+  var totalSecs = Math.floor(td.elapsed / 1000);
+  var recorder = nameInput.value.trim() || '未署名';
+  var note = document.getElementById('note-\'' + dept + '\'').value.trim();
+  
   records.unshift({
     id: Date.now(),
     recorder: recorder,
-    dept: selectedDept,
-    type: timerType,
+    dept: dept,
     duration: totalSecs,
+    count: td.count,
     note: note,
     timestamp: new Date().toISOString()
   });
   localStorage.setItem('mdw_records', JSON.stringify(records));
-
-  elapsed = 0; startTime = null; isRunning = false;
-  document.getElementById('startBtn').textContent = '开始';
-  document.getElementById('startBtn').classList.remove('running');
-  document.getElementById('recordBtn').disabled = true;
-  document.getElementById('timerDisplay').textContent = '00:00';
-  document.getElementById('timerDisplay').className = 'timer-digits';
-  document.getElementById('noteInput').value = '';
+  
+  // 重置该计时器
+  td.elapsed = 0;
+  td.startTime = null;
+  td.isRunning = false;
+  td.count = 1;
+  td.note = '';
+  
+  renderTimers();
   renderRecords();
   updateStats();
 }
 
-function resetTimer() {
-  clearInterval(timerInterval);
-  elapsed = 0; startTime = null; isRunning = false;
-  document.getElementById('startBtn').textContent = '开始';
-  document.getElementById('startBtn').classList.remove('running');
-  document.getElementById('recordBtn').disabled = true;
-  document.getElementById('timerDisplay').textContent = '00:00';
-  document.getElementById('timerDisplay').className = 'timer-digits';
+function resetTimer(dept) {
+  var td = timerData[dept];
+  if (!td) return;
+  
+  if (td.interval) clearInterval(td.interval);
+  td.elapsed = 0;
+  td.startTime = null;
+  td.isRunning = false;
+  td.count = 1;
+  td.note = '';
+  
+  renderTimers();
 }
 
 // ── 删除记录 ──────────────────────────────────────────────
@@ -553,9 +664,9 @@ function deleteRecord(id) {
 
 // ── 统计 ──────────────────────────────────────────────────
 function updateStats() {
-  var filtered = selectedDept
-    ? records.filter(function(r) { return r.dept === selectedDept; })
-    : [];
+  var filtered = selectedDepts.length > 0
+    ? records.filter(function(r) { return selectedDepts.includes(r.dept); })
+    : records;
   document.getElementById('statCount').textContent = records.length;
   document.getElementById('totalCount').textContent =
     records.length ? records.length + ' 条记录' : '暂无记录';
@@ -590,10 +701,11 @@ function renderRecords() {
 
     var item = document.createElement('div');
     item.className = 'record-item';
+    var countLabel = r.count && r.count > 1 ? ' · ' + r.count + '人' : '';
     item.innerHTML =
       '<div class="record-left">' +
         '<div class="record-dept">' + r.dept + '</div>' +
-        '<div class="record-meta">' + (r.type === 'wait' ? '等待' : '服务') + ' · ' + r.recorder + '</div>' +
+        '<div class="record-meta">' + countLabel + ' · ' + r.recorder + '</div>' +
         (r.note ? '<div class="record-note">' + r.note + '</div>' : '') +
       '</div>' +
       '<div class="record-right">' +
@@ -634,7 +746,6 @@ function renderRecords() {
       }
     });
 
-    // 点击其他区域收回
     item.addEventListener('click', function() {
       if (swiped) {
         item.style.transform = 'translateX(0)';
@@ -651,11 +762,11 @@ function renderRecords() {
 // ── 导出 CSV ──────────────────────────────────────────────
 function exportCSV() {
   if (!records.length) { alert('暂无数据'); return; }
-  var header = '记录人,科室,类型,时长(秒),时长(分:秒),备注,记录时间';
+  var header = '记录人,科室,处理人数,时长(秒),时长(分:秒),备注,记录时间';
   var rows = records.map(function(r) {
     return [
       r.recorder, r.dept,
-      r.type === 'wait' ? '等待时间' : '服务时间',
+      r.count || 1,
       r.duration, fmtSec(r.duration),
       r.note || '', fmtTime(r.timestamp)
     ].map(function(v) {
