@@ -762,13 +762,13 @@ function renderRecords() {
 // ── 导出 CSV ──────────────────────────────────────────────
 function exportCSV() {
   if (!records.length) { alert('暂无数据'); return; }
-  var header = '记录人,科室,处理人数,时长(秒),时长(分:秒),备注,记录时间';
+  var header = '记录人,科室,处理人数,时长(分钟)';
   var rows = records.map(function(r) {
+    var minutes = (r.duration / 60).toFixed(1); // 转换为分钟，保留一位小数
     return [
       r.recorder, r.dept,
       r.count || 1,
-      r.duration, fmtSec(r.duration),
-      r.note || '', fmtTime(r.timestamp)
+      minutes
     ].map(function(v) {
       return '"' + String(v).replace(/"/g, '""') + '"';
     }).join(',');
