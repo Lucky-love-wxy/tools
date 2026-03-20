@@ -406,9 +406,51 @@ if (!Array.isArray(depts) || depts.length === 0) {
   localStorage.setItem('mdw_depts', JSON.stringify(depts));
 }
 var records       = JSON.parse(localStorage.getItem('mdw_records') || '[]');
-var selectedDepts = []; // 已选中的科室列表
+var selectedDepts = JSON.parse(localStorage.getItem('mdw_selectedDepts') || '[]');
 var MAX_DEPTS     = 3;
-var timerData     = {}; // 每个科室的计时数据
+var timerData     = JSON.parse(localStorage.getItem('mdw_timerData') || '{}');
+
+// 恢复已选科室的计时器
+selectedDepts.forEach(function(dept) {
+  if (!timerData[dept]) {
+    timerData[dept] = {
+      dept: dept,
+      elapsed: 0,
+      startTime: null,
+      isRunning: false,
+      interval: null,
+      count: 1,
+      note: ''
+    };
+  } else {
+    // 清除可能残留的 interval
+    if (timerData[dept].interval) {
+      clearInterval(timerData[dept].interval);
+      timerData[dept].interval = null;
+    }
+  }
+});
+
+function saveSelectedDepts() {
+  localStorage.setItem('mdw_selectedDepts', JSON.stringify(selectedDepts));
+}
+function saveTimerData() {
+  // 保存时清除 interval（不需要序列化）
+  var toSave = {};
+  Object.keys(timerData).forEach(function(k) {
+    var td = timerData[k];
+    toSave[k] = {
+      dept: td.dept,
+      elapsed: td.elapsed || 0,
+      startTime: td.startTime,
+      isRunning: false, // 恢复时强制停止
+      interval: null,
+      count: td.count || 1,
+      note: td.note || ''
+    };
+  });
+  localStorage.setItem('mdw_timerData', JSON.stringify(toSave));
+}
 
 var nameInput = document.getElementById('recorderName');
 nameInput.value = localStorage.getItem('mdw_recorder') || '';
@@ -438,23 +480,31 @@ function renderDepts() {
       if (isDisabled) return;
       toggleDept(d);
     };
-    // 长按删除自定义科室
+    // 长按删除自定义科室（兼容 iOS，阻止误触发）
     var pressTimer;
-    btn.addEventListener('touchstart', function() {
+    var isLongPress = false;
+    btn.addEventListener('touchstart', function(e) {
+      isLongPress = false;
       pressTimer = setTimeout(function() {
+        isLongPress = true;
         if (!DEFAULT_DEPTS.includes(d) && confirm('删除"' + d + '"？')) {
           depts = depts.filter(function(x) { return x !== d; });
           selectedDepts = selectedDepts.filter(function(x) { return x !== d; });
           if (timerData[d] && timerData[d].interval) clearInterval(timerData[d].interval);
           delete timerData[d];
           localStorage.setItem('mdw_depts', JSON.stringify(depts));
+          saveSelectedDepts();
+          saveTimerData();
           renderDepts();
           renderTimers();
           updateStats();
         }
       }, 700);
     });
-    btn.addEventListener('touchend', function() { clearTimeout(pressTimer); });
+    btn.addEventListener('touchend', function(e) {
+      clearTimeout(pressTimer);
+      // 短按不阻止默认行为，让 onclick 正常触发
+    });
     btn.addEventListener('touchmove', function() { clearTimeout(pressTimer); });
     grid.appendChild(btn);
   });
@@ -489,6 +539,8 @@ function toggleDept(d) {
       note: ''
     };
   }
+  saveSelectedDepts();
+  saveTimerData();
   renderDepts();
   renderTimers();
   updateStats();
@@ -545,9 +597,11 @@ function renderTimers() {
     document.getElementById('count-\'' + dept + '\'').addEventListener('input', function(e) {
       var val = parseInt(e.target.value);
       timerData[dept].count = (val && val > 0) ? val : 1;
+      saveTimerData();
     });
     document.getElementById('note-\'' + dept + '\'').addEventListener('input', function(e) {
       timerData[dept].note = e.target.value;
+      saveTimerData();
     });
   });
 }
@@ -560,6 +614,7 @@ function adjustCount(dept, delta) {
   val = Math.max(1, val + delta);
   input.value = val;
   td.count = val;
+  saveTimerData();
 }
 
 function toggleTimer(dept) {
@@ -586,6 +641,7 @@ function toggleTimer(dept) {
       updateTimerDisplay(dept);
     }, 200);
   }
+  saveTimerData();
   renderTimers();
 }
 
@@ -634,7 +690,7 @@ function recordTime(dept) {
   td.isRunning = false;
   td.count = 1;
   td.note = '';
-  
+  saveTimerData();
   renderTimers();
   renderRecords();
   updateStats();
@@ -650,7 +706,7 @@ function resetTimer(dept) {
   td.isRunning = false;
   td.count = 1;
   td.note = '';
-  
+  saveTimerData();
   renderTimers();
 }
 
